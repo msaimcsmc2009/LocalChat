@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>Local Chat Work</title>
+  <link rel="preconnect" href="data:," />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <!-- ============================================================
+       SVG ICON KUTUSU
+       Hicbir kullanim yerinde tekrar yazmamak icin ikonlar
+       bir kez burada tanimlanir, JS ile klonlanir.
+       fill="none" + stroke="currentColor" => ikonlar
+       kendi bulunduklari yuzeyin rengini alir.
+       ============================================================ -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-hash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18" />
+    </symbol>
+    <symbol id="i-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5a8.4 8.4 0 0 1-8.8 8.4 9 9 0 0 1-3.6-.8L3 21l1.9-5.1A8.4 8.4 0 0 1 12.6 3.1a8.4 8.4 0 0 1 8.4 8.4Z" />
+    </symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m6 9 6 6 6-6" />
+    </symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m9 6 6 6-6 6" />
+    </symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h18M3 12h18M3 18h18" />
+    </symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+    </symbol>
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 20v-1.6a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20" />
+      <circle cx="9" cy="7.5" r="3.2" />
+      <path d="M22 20v-1.6a4 4 0 0 0-3-3.85M16.5 4.6a3.2 3.2 0 0 1 0 5.9" />
+    </symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.9 2.9l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.9-2.9l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.9-2.9l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.9 2.9l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" />
+    </symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 5v14M5 12h14" />
+    </symbol>
+    <symbol id="i-at" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="4" /><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
+    </symbol>
+    <symbol id="i-paperclip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8-8a3.4 3.4 0 0 1 4.8 4.8l-8 8a1.8 1.8 0 0 1-2.5-2.5l7.4-7.4" />
+    </symbol>
+    <symbol id="i-smile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9" /><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0" /><path d="M9 9.5h.01M15 9.5h.01" />
+    </symbol>
+    <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4.5 12 20 4l-4 16-4.5-6.2Z" /><path d="M11.5 13.8 20 4" />
+    </symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 6l12 12M18 6 6 18" />
+    </symbol>
+    <symbol id="i-headset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 13v-1a9 9 0 0 1 18 0v1" />
+      <path d="M21 15a2 2 0 0 1-2 2h-1v-5h1a2 2 0 0 1 2 2Z" />
+      <path d="M3 15a2 2 0 0 0 2 2h1v-5H5a2 2 0 0 0-2 2Z" />
+      <path d="M19 17v1a3 3 0 0 1-3 3h-2" />
+    </symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 17v5" /><path d="M9 3h6l-1 6 3 3H7l3-3-1-6Z" />
+    </symbol>
+  </svg>
+
+  <!-- Uygulama kabugu: 3 kolonlu izgara -->
+  <div class="app-shell" id="appShell">
+
+    <!-- ============ SOL SIDEBAR ============ -->
+    <aside class="sidebar" id="sidebar" aria-label="Kanallar ve dogrudan mesajlar">
+      <div class="sidebar__head">
+        <div class="workspace">
+          <span class="workspace__mark">
+            <svg class="icon" aria-hidden="true"><use href="#i-logo" /></svg>
+          </span>
+          <div class="workspace__meta">
+            <span class="workspace__name">Local Chat Work</span>
+            <span class="workspace__tag">Yerel ag ekibi</span>
+          </div>
+          <svg class="icon icon--sm workspace__caret" aria-hidden="true"><use href="#i-chevron-down" /></svg>
+        </div>
+      </div>
+
+      <div class="sidebar__scroll">
+        <section class="nav-group">
+          <h2 class="nav-group__title">Kanallar</h2>
+          <!-- Kanallar JS ile buraya basilir -->
+          <ul class="nav-list" id="channelList"></ul>
+        </section>
+
+        <section class="nav-group">
+          <h2 class="nav-group__title">
+            Direct Messages
+            <button class="icon-btn icon-btn--ghost" type="button" aria-label="Yeni dogrudan mesaj">
+              <svg class="icon icon--sm" aria-hidden="true"><use href="#i-plus" /></svg>
+            </button>
+          </h2>
+          <!-- Dogrudan mesajlar JS ile buraya basilir -->
+          <ul class="nav-list" id="dmList"></ul>
+        </section>
+      </div>
+
+      <!-- Alt profil alani -->
+      <div class="sidebar__foot">
+        <div class="profile-card">
+          <div class="avatar avatar--lg" id="profileAvatar" data-tone="teal">
+            <span class="avatar__text" id="profileInitials">S</span>
+            <span class="status status--online" aria-label="Cevrimici"></span>
+          </div>
+          <div class="profile-card__meta">
+            <span class="profile-card__name" id="profileName">Sen</span>
+            <span class="profile-card__sub">Cevrimici</span>
+          </div>
+          <div class="profile-card__actions">
+            <button class="icon-btn icon-btn--ghost" type="button" aria-label="Sustur">
+              <svg class="icon icon--sm" aria-hidden="true"><use href="#i-headset" /></svg>
+            </button>
+            <button class="icon-btn icon-btn--ghost" type="button" aria-label="Ayarlar">
+              <svg class="icon icon--sm" aria-hidden="true"><use href="#i-settings" /></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============ ORTA CHAT ALANI ============ -->
+    <main class="chat" aria-label="Sohbet">
+      <header class="chat__head">
+        <button class="icon-btn chat__menu" id="openSidebar" type="button" aria-label="Menuyu ac">
+          <svg class="icon" aria-hidden="true"><use href="#i-menu" /></svg>
+        </button>
+
+        <div class="chat__head-main">
+          <h1 class="chat__title">
+            <svg class="icon icon--sm chat__title-icon" aria-hidden="true"><use href="#i-hash" /></svg>
+            <span id="channelTitle">general</span>
+          </h1>
+          <p class="chat__topic" id="channelTopic">Proje genelinde duyurular ve gundelik sohbet.</p>
+        </div>
+
+        <div class="chat__head-actions">
+          <span class="pill" id="onlineCount">3 cevrimici</span>
+          <div class="chat__head-divider" aria-hidden="true"></div>
+          <button class="icon-btn" type="button" aria-label="Ara">
+            <svg class="icon" aria-hidden="true"><use href="#i-search" /></svg>
+          </button>
+          <button class="icon-btn" id="toggleMembers" type="button" aria-label="Uye listesini goster">
+            <svg class="icon" aria-hidden="true"><use href="#i-users" /></svg>
+          </button>
+          <button class="icon-btn" type="button" aria-label="Kanal ayarlari">
+            <svg class="icon" aria-hidden="true"><use href="#i-settings" /></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="chat__body" id="messageList" role="log" aria-live="polite" aria-label="Mesajlar"></div>
+
+      <!-- Mesaj yazma alani -->
+      <footer class="composer">
+        <div class="composer__box">
+          <button class="icon-btn icon-btn--composer" type="button" aria-label="Dosya ekle">
+            <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>
+          </button>
+          <input
+            id="messageInput"
+            class="composer__input"
+            type="text"
+            autocomplete="off"
+            placeholder="Mesaj yaz"
+            aria-label="Mesaj metni" />
+          <button class="icon-btn icon-btn--composer" type="button" aria-label="Emoji ekle">
+            <svg class="icon" aria-hidden="true"><use href="#i-smile" /></svg>
+          </button>
+          <button class="composer__send" id="sendButton" type="button">
+            <span class="sr-only">Gonder</span>
+            <svg class="icon icon--sm" aria-hidden="true"><use href="#i-send" /></svg>
+          </button>
+        </div>
+        <p class="composer__hint">
+          <strong>Enter</strong> ile gonder &middot; <strong>Shift + Enter</strong> yeni satir
+        </p>
+      </footer>
+    </main>
+
+    <!-- ============ SAG UYE PANELI ============ -->
+    <aside class="members" id="members" aria-label="Uye listesi">
+      <div class="members__head">
+        <h2 class="members__title">Uyeler</h2>
+        <button class="icon-btn icon-btn--ghost" id="closeMembers" type="button" aria-label="Uye listesini kapat">
+          <svg class="icon icon--sm" aria-hidden="true"><use href="#i-x" /></svg>
+        </button>
+      </div>
+      <div class="members__scroll" id="memberList"></div>
+    </aside>
+  </div>
+
+  <!-- Mobil icin iki overlay: biri soldaki sidebar'i, biri sagdaki uye panelini acar -->
+  <div class="scrim" id="scrim" hidden></div>
+
+  <!-- Kullanici secildiginde acilan sag ust detay karti -->
+  <div class="user-card" id="userCard" hidden aria-live="polite"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

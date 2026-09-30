@@ -1,0 +1,1254 @@
+/* =========================================================================
+   LOCAL CHAT WORK - style.css
+   -------------------------------------------------------------------------
+   Bolum sirasi:
+     1. Design Tokens
+     2. Reset & Base
+     3. Layout (app-shell)
+     4. Sidebar
+     5. Chat Panel + Composer
+     6. Members Panel
+     7. User Card
+     8. Scrollbar
+     9. Responsive
+    10. Motion / Erisilebilirlik
+   ========================================================================= */
+
+
+/* =========================================================================
+   1. DESIGN TOKENS
+   -------------------------------------------------------------------------
+   Tum renk, bosluk ve yukseklik degerleri tek yerde toplandi.
+   Neden? Bir degeri 40 yerde yazarsak, degistirmemiz gerektiginde
+   40 yeri duzeltmemiz gerekir. Tek kaynak (single source of truth) ile
+   degisiklik bir satira iner ve tasarim tutarli kalir.
+   ========================================================================= */
+:root {
+  /* --- Zeminler: en koyudan en acika dogru katmanlar --- */
+  --c-bg:            #0a0e13;   /* uygulama arka plani */
+  --c-surface:       #0e141b;   /* sidebar ve uye paneli */
+  --c-surface-2:     #121a22;   /* mesaj alani, ikincil yuzey */
+  --c-surface-3:     #18222c;   /* hover, girdi kutulari */
+  --c-surface-4:     #1f2b36;   /* en belirgin yuzey (aktif kanal) */
+
+  /* --- Kenarliklar --- */
+  --c-border:        #1c2731;
+  --c-border-strong: #26333f;
+
+  /* --- Metin hiyerarsisi (3 kademe) --- */
+  --c-text:      #e8eef4;   /* ana metin, en parlak */
+  --c-text-dim:  #9fb0c0;   /* ikincil: aciklama, zaman damgasi */
+  --c-text-mute: #6b7f90;   /* ucuncul: pasif ikon, bos etiketler */
+
+  /* --- Vurgu rengi: teal --- */
+  --c-accent:      #2dd4bf;
+  --c-accent-soft: #1a9e8e;
+  --c-accent-dim:  rgba(45, 212, 191, 0.12);
+  --c-accent-line: rgba(45, 212, 191, 0.28);
+
+  /* --- Durum renkleri --- */
+  --c-online:  #3fb950;
+  --c-offline: #4a5a68;
+  --c-idle:    #d29922;
+  --c-danger:  #f0665e;
+
+  /* --- Bosluk olcegi: 4px tabanli --- */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  20px;
+  --s-6:  24px;
+  --s-8:  32px;
+  --s-10: 40px;
+  --s-12: 48px;
+
+  /* --- Kose yuvarlakligi --- */
+  --r-sm:  6px;
+  --r-md:  8px;
+  --r-lg:  12px;
+  --r-xl:  16px;
+  --r-pill: 999px;
+
+  /* --- Golge: ince ve yumusak, derin golge degil --- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.5);
+
+  /* --- Tipografi --- */
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI Variable",
+          "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", Consolas,
+               "Liberation Mono", monospace;
+
+  --t-11: 11px;
+  --t-12: 12px;
+  --t-13: 13px;
+  --t-14: 14px;
+  --t-15: 15px;
+  --t-18: 18px;
+  --t-22: 22px;
+
+  /* --- Gecis sureleri --- */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --fast: 120ms var(--ease);
+  --base: 180ms var(--ease);
+
+  /* --- Sabit olculer --- */
+  --sidebar-w:  252px;
+  --members-w:  244px;
+  --head-h:     58px;
+}
+
+
+/* =========================================================================
+   2. RESET & BASE
+   ========================================================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;   /* padding, width hesabina dahil edilir */
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font);
+  font-size: var(--t-14);
+  line-height: 1.5;
+  color: var(--c-text);
+  background: var(--c-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;          /* uygulama kendi icinde kaydirilir */
+}
+
+h1, h2, h3, p, ul, ol, figure {
+  margin: 0;
+  padding: 0;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+input {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  outline: none;
+}
+
+/* Klavye ile gezinenler icin gorunur odak halkasi.
+   Fare ile tiklamada gorunmez (:focus-visible) - modern davranis. */
+:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* Yalnizca ekran okuyucular icin metin */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Tum ikonlar bu olcuye uyar -> butonlarda hizali gorunur */
+.icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  display: block;
+}
+
+.icon--sm {
+  width: 16px;
+  height: 16px;
+}
+
+
+/* =========================================================================
+   3. LAYOUT
+   -------------------------------------------------------------------------
+   CSS Grid 3 kolonlu kabuk:
+     [ sidebar ] [ chat ] [ members ]
+   grid-template-columns her zaman ekranin yuzde 100'unu kaplar,
+   esnek orta kolon (1fr) kalan boslugu alir.
+   ========================================================================= */
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr) var(--members-w);
+  height: 100vh;
+  height: 100dvh;   /* mobil tarayici cubugu icin dikey viewport */
+  background: var(--c-bg);
+}
+
+
+/* =========================================================================
+   4. SIDEBAR
+   ========================================================================= */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;                       /* flex cocuklarinin tasmasini onler */
+  background: var(--c-surface);
+  border-right: 1px solid var(--c-border);
+}
+
+.sidebar__head {
+  flex: none;
+  height: var(--head-h);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--s-3);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.workspace {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  padding: var(--s-1) var(--s-2);
+  border-radius: var(--r-md);
+  transition: background var(--fast);
+  cursor: pointer;
+}
+
+.workspace:hover {
+  background: var(--c-surface-3);
+}
+
+.workspace__mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-md);
+  color: var(--c-accent);
+  background: var(--c-accent-dim);
+  border: 1px solid var(--c-accent-line);
+}
+
+.workspace__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.workspace__name {
+  font-size: var(--t-14);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workspace__tag {
+  font-size: var(--t-11);
+  color: var(--c-text-mute);
+  white-space: nowrap;
+}
+
+.workspace__caret {
+  color: var(--c-text-mute);
+}
+
+/* --- Kaydirilabilir orta kisim --- */
+.sidebar__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;   /* dis sayfaya kayma aktarilmasin */
+  padding: var(--s-4) var(--s-2) var(--s-2);
+}
+
+.nav-group + .nav-group {
+  margin-top: var(--s-6);
+}
+
+.nav-group__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  padding: 0 var(--s-2) var(--s-2);
+  font-size: var(--t-11);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-mute);
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;      /* cok sik yigilmis liste yerine serbest durus */
+}
+
+/* --- Kanal ve DM ogesi --- */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  padding: var(--s-2) var(--s-2);
+  border-radius: var(--r-sm);
+  color: var(--c-text-dim);
+  font-size: var(--t-14);
+  text-align: left;
+  transition: background var(--fast), color var(--fast);
+}
+
+.nav-item:hover {
+  background: var(--c-surface-3);
+  color: var(--c-text);
+}
+
+.nav-item.is-active {
+  background: var(--c-surface-4);
+  color: var(--c-text);
+  font-weight: 500;
+}
+
+.nav-item__icon {
+  color: var(--c-text-mute);
+  transition: color var(--fast);
+}
+
+.nav-item.is-active .nav-item__icon {
+  color: var(--c-accent);
+}
+
+.nav-item__name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-item__meta {
+  flex: none;
+  font-size: var(--t-11);
+  color: var(--c-text-mute);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Alt profil alani */
+.sidebar__foot {
+  flex: none;
+  padding: var(--s-2);
+  border-top: 1px solid var(--c-border);
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2);
+  border-radius: var(--r-md);
+  background: var(--c-surface-2);
+  border: 1px solid var(--c-border);
+  transition: border-color var(--fast);
+}
+
+.profile-card:hover {
+  border-color: var(--c-border-strong);
+}
+
+.profile-card__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.profile-card__name {
+  font-size: var(--t-13);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-card__sub {
+  font-size: var(--t-11);
+  color: var(--c-text-mute);
+}
+
+.profile-card__actions {
+  display: flex;
+  gap: 2px;
+  flex: none;
+}
+
+
+/* =========================================================================
+   AVATAR ve STATUS
+   -------------------------------------------------------------------------
+   Avatarlar harici gorsel dosyasi kullanmaz: kullanici adinin
+   bas harflerinden uretilir. Renk, kullaniciya sabit bir "tone"
+   ile atanir ve CSS'te sinif uzerinden degisir.
+   ========================================================================= */
+.avatar {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-md);
+  background: var(--c-surface-4);
+  color: var(--c-text-dim);
+  font-size: var(--t-12);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+.avatar--sm { width: 24px; height: 24px; font-size: var(--t-11); border-radius: var(--r-sm); }
+.avatar--lg { width: 34px; height: 34px; font-size: var(--t-13); }
+.avatar--xl { width: 44px; height: 44px; font-size: var(--t-15); border-radius: var(--r-lg); }
+
+.avatar__text { line-height: 1; }
+
+/* Avatar tonlari: her kullanici farkli ama uyumlu bir renk alir */
+.avatar[data-tone="teal"]   { background: rgba(45, 212, 191, 0.16); color: #5eead4; }
+.avatar[data-tone="blue"]   { background: rgba(96, 165, 250, 0.16); color: #93c5fd; }
+.avatar[data-tone="violet"] { background: rgba(167, 139, 250, 0.16); color: #c4b5fd; }
+.avatar[data-tone="amber"]  { background: rgba(251, 191, 36, 0.16);  color: #fcd34d; }
+.avatar[data-tone="rose"]   { background: rgba(251, 113, 133, 0.16); color: #fda4af; }
+
+.status {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--c-surface);   /* zemin renginde halka: kesik gorunum */
+}
+
+.avatar--sm .status { width: 8px; height: 8px; border-width: 2px; }
+.avatar--lg .status { width: 12px; height: 12px; }
+
+.status--online  { background: var(--c-online); }
+.status--offline { background: var(--c-offline); }
+.status--idle    { background: var(--c-idle); }
+
+
+/* =========================================================================
+   ICON BUTONLARI
+   ========================================================================= */
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--r-md);
+  color: var(--c-text-dim);
+  transition: background var(--fast), color var(--fast);
+}
+
+.icon-btn:hover {
+  background: var(--c-surface-3);
+  color: var(--c-text);
+}
+
+.icon-btn--ghost {
+  width: 26px;
+  height: 26px;
+  color: var(--c-text-mute);
+}
+
+.icon-btn--ghost:hover {
+  background: var(--c-surface-4);
+}
+
+.icon-btn--composer {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-md);
+  color: var(--c-text-mute);
+}
+
+.icon-btn--composer:hover {
+  background: var(--c-surface-4);
+  color: var(--c-text-dim);
+}
+
+/* Bir kanal/uye secildiginde vurgu rengi */
+.icon-btn.is-on {
+  color: var(--c-accent);
+  background: var(--c-accent-dim);
+}
+
+
+/* =========================================================================
+   5. CHAT PANEL
+   ========================================================================= */
+.chat {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;            /* grid daralmasi icin kritik */
+  min-height: 0;
+  background: var(--c-surface-2);
+}
+
+.chat__head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  height: var(--head-h);
+  padding: 0 var(--s-4);
+  background: var(--c-surface);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.chat__menu {
+  display: none;           /* masaustunde gereksiz, mobilde gorunur */
+}
+
+.chat__head-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat__title {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--t-15);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--c-text);
+}
+
+.chat__title-icon {
+  color: var(--c-text-mute);
+}
+
+.chat__topic {
+  font-size: var(--t-12);
+  color: var(--c-text-mute);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat__head-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  flex: none;
+}
+
+.chat__head-divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 var(--s-2);
+  background: var(--c-border);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  height: 26px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-pill);
+  background: var(--c-surface-3);
+  color: var(--c-text-dim);
+  font-size: var(--t-12);
+  white-space: nowrap;
+}
+
+.pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--c-online);
+}
+
+/* --- Mesaj alani --- */
+.chat__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--s-5) 0 var(--s-4);
+}
+
+/* Kanal basligi: kanala girildigini gosteren ayirici */
+.channel-intro {
+  padding: var(--s-6) var(--s-6) var(--s-5);
+  margin-bottom: var(--s-2);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.channel-intro__title {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  font-size: var(--t-22);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--s-2);
+}
+
+.channel-intro__mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: var(--r-lg);
+  background: var(--c-surface-4);
+  color: var(--c-accent);
+}
+
+.channel-intro__desc {
+  font-size: var(--t-13);
+  color: var(--c-text-dim);
+  max-width: 62ch;
+}
+
+/* Tarih ayirici */
+.day-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin: var(--s-5) var(--s-6) var(--s-4);
+  color: var(--c-text-mute);
+  font-size: var(--t-11);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.day-divider::before,
+.day-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--c-border);
+}
+
+/* --- Mesaj grubu ---
+   Ayni kullanici ardisik mesajlarda tek bir grup altinda toplanir
+   (Slack / Discord davranisi). Boylece her mesajda isim tekrar etmez
+   ve mesaj listesi daha okunakli olur. */
+.msg-group + .msg-group {
+  margin-top: var(--s-4);
+}
+
+/* --- Tek mesaj --- */
+.msg {
+  display: flex;
+  gap: var(--s-3);
+  padding: 1px var(--s-6);
+  transition: background var(--fast);
+}
+
+.msg:hover {
+  background: rgba(255, 255, 255, 0.018);
+}
+
+/* Grubun ilk mesaji: ust bosluk birakiyor, isim burada gorunur */
+.msg--start {
+  padding-top: var(--s-2);
+}
+
+/* Gruptaki mesajlarda avatar yerine bosluk -> hizalama bozulmaz.
+   (Gorsel bosluk, CSS icin daha guvenli bir yontem.) */
+.msg__gutter {
+  flex: none;
+  width: 34px;
+  display: flex;
+  justify-content: center;
+  padding-top: 2px;
+}
+
+.msg__hover-time {
+  display: none;
+  font-size: var(--t-11);
+  color: var(--c-text-mute);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding-top: 3px;
+}
+
+.msg:hover .msg__hover-time { display: block; }
+
+.msg__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.msg__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  margin-bottom: 1px;
+}
+
+.msg__author {
+  font-size: var(--t-14);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--c-text);
+}
+
+.msg__author--me { color: var(--c-accent); }
+
+.msg__time {
+  font-size: var(--t-11);
+  color: var(--c-text-mute);
+  font-variant-numeric: tabular-nums;
+}
+
+.msg__text {
+  font-size: var(--t-14);
+  line-height: 1.55;
+  color: #d4dee7;
+  overflow-wrap: anywhere;   /* uzun kelimeler satiri tasirmasin */
+  white-space: pre-wrap;     /* \n karakterlerini degerlendirir */
+}
+
+/* Kod parcasi iceren mesaj */
+.msg__code {
+  margin-top: var(--s-2);
+  padding: var(--s-3);
+  border-radius: var(--r-md);
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  font-family: var(--font-mono);
+  font-size: var(--t-12);
+  color: #9fe6db;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* Sistem mesaji (kanala katilma gibi) */
+.msg--system {
+  justify-content: center;
+  padding: var(--s-2) var(--s-6);
+}
+
+.msg--system .msg__text {
+  color: var(--c-text-mute);
+  font-size: var(--t-12);
+  text-align: center;
+}
+
+/* --- Composer --- */
+.composer {
+  flex: none;
+  padding: 0 var(--s-6) var(--s-4);
+  background: var(--c-surface-2);
+}
+
+.composer__box {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: var(--s-2) var(--s-2) var(--s-2) var(--s-2);
+  border-radius: var(--r-xl);
+  background: var(--c-surface-4);
+  border: 1px solid var(--c-border);
+  transition: border-color var(--base), box-shadow var(--base);
+}
+
+/* Odak halkasi: kompozitor odaklandiginda cerceve vurgulanir.
+   border-color + box-shadow birlikte kullanilir; boylece
+   kutu "buyuyor" gibi durmaz, yerinden oynanmaz. */
+.composer__box:focus-within {
+  border-color: var(--c-accent-line);
+  box-shadow: 0 0 0 3px var(--c-accent-dim);
+}
+
+.composer__input {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  padding: 0 var(--s-2);
+  font-size: var(--t-14);
+  color: var(--c-text);
+}
+
+.composer__input::placeholder {
+  color: var(--c-text-mute);
+}
+
+.composer__send {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: var(--r-md);
+  color: #06231f;
+  background: var(--c-accent);
+  transition: background var(--fast), opacity var(--fast), transform var(--fast);
+}
+
+.composer__send:hover {
+  background: #48dfcd;
+}
+
+.composer__send:active {
+  transform: scale(0.94);
+}
+
+/* Bos mesajda gonder butonu soluk: kullanicinin neden
+   gonderemedigini anlamasini gorsel olarak kolaylastirir. */
+.composer__send:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.composer__send:disabled:hover {
+  background: var(--c-accent);
+  transform: none;
+}
+
+.composer__hint {
+  margin-top: var(--s-2);
+  font-size: var(--t-11);
+  color: var(--c-text-mute);
+}
+
+.composer__hint strong {
+  color: var(--c-text-dim);
+  font-weight: 600;
+}
+
+
+/* =========================================================================
+   6. UYE PANELI
+   ========================================================================= */
+.members {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--c-surface);
+  border-left: 1px solid var(--c-border);
+}
+
+.members__head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--head-h);
+  padding: 0 var(--s-3) 0 var(--s-4);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.members__title {
+  font-size: var(--t-12);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-mute);
+}
+
+/* Kapatma butonu masaustunde gizli - panel zaten her zaman acik.
+   Mobilde drawer olarak acildiginda kullaniciyi cikis yolu vermeli. */
+.members__head .icon-btn { display: none; }
+
+.members__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--s-4) var(--s-2);
+}
+
+.member-group + .member-group {
+  margin-top: var(--s-5);
+}
+
+.member-group__title {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 0 var(--s-2) var(--s-2);
+  font-size: var(--t-11);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-mute);
+}
+
+.member-group__title::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+}
+
+.member-group--online .member-group__title::before  { background: var(--c-online); }
+.member-group--offline .member-group__title::before { background: var(--c-offline); }
+
+.member {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  padding: var(--s-2);
+  border-radius: var(--r-md);
+  text-align: left;
+  transition: background var(--fast);
+}
+
+.member:hover {
+  background: var(--c-surface-3);
+}
+
+.member.is-active {
+  background: var(--c-surface-4);
+}
+
+.member__meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.member__name {
+  display: block;
+  font-size: var(--t-13);
+  font-weight: 500;
+  color: var(--c-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.member__name--offline { color: var(--c-text-mute); }
+
+.member__role {
+  display: block;
+  font-size: var(--t-11);
+  color: var(--c-text-mute);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* =========================================================================
+   7. USER CARD
+   -------------------------------------------------------------------------
+   Uye listesinden birine tiklandiginda sag ustte beliren kucuk detay karti.
+   ========================================================================= */
+.user-card {
+  position: fixed;
+  top: calc(var(--head-h) + var(--s-2));
+  right: calc(var(--members-w) + var(--s-3));
+  z-index: 40;
+  width: 264px;
+  padding: var(--s-4);
+  border-radius: var(--r-lg);
+  background: var(--c-surface-3);
+  border: 1px solid var(--c-border-strong);
+  box-shadow: var(--shadow-lg);
+  animation: card-in 160ms var(--ease);
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.user-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+
+.user-card__name {
+  font-size: var(--t-15);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.user-card__role {
+  font-size: var(--t-12);
+  color: var(--c-text-dim);
+}
+
+.user-card__grid {
+  display: grid;
+  gap: var(--s-2);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--c-border);
+}
+
+.user-card__row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--t-12);
+  color: var(--c-text-dim);
+}
+
+.user-card__row .icon {
+  color: var(--c-text-mute);
+}
+
+.user-card__close {
+  position: absolute;
+  top: var(--s-2);
+  right: var(--s-2);
+}
+
+
+/* =========================================================================
+   8. SCRIM (mobil overlay)
+   ========================================================================= */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(1.5px);
+  animation: fade-in 160ms var(--ease);
+}
+
+.scrim[hidden] { display: none; }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+
+/* =========================================================================
+   9. RESPONSIVE
+   -------------------------------------------------------------------------
+   Mobil-first degil, desktop-first yazdik (3 kolon guzel gorunsun diye)
+   ve asagida erisilebilir ozellikler kademeli olarak kapatiliyor.
+
+   Kademeler:
+     <=1280px  sag panel daralir
+     <=1080px  sag panel tamamen gizlenir, hamburger ile acilir
+     <=768px   sol sidebar gizlenir, hamburger ile acilir
+     <=520px   kanal basligi kuculur, mesajlar daralir
+   ========================================================================= */
+
+/* --- 1280px alti: sag paneli biraz daralt --- */
+@media (max-width: 1280px) {
+  :root {
+    --sidebar-w: 232px;
+    --members-w: 216px;
+  }
+}
+
+/* --- 1080px alti: sag panel gizlenir, uye listesinden acilir --- */
+@media (max-width: 1080px) {
+  .app-shell {
+    grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  }
+
+  /* Uye paneli: temadan tamamen cikarip sabit konumlu drawer yapiyoruz.
+     Boylece JS ayni HTML'i kullanmaya devam ediyor, sadece yerlesim degisiyor. */
+  .members {
+    position: fixed;
+    z-index: 50;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(300px, 84vw);
+    transform: translateX(100%);       /* ekranin disinda, gorunmez */
+    transition: transform var(--base);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .members.is-open {
+    transform: translateX(0);
+  }
+
+  .members__head .icon-btn {
+    display: grid;                      /* kapatma butonu artik gerekli */
+  }
+
+  /* Basligin uye butonu vurgulanir: panel kapaliyken bir ipucu verir */
+  #toggleMembers { display: grid; }
+}
+
+/* --- 768px alti: sol sidebar da drawer olur --- */
+@media (max-width: 768px) {
+  .app-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar {
+    position: fixed;
+    z-index: 50;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(280px, 84vw);
+    transform: translateX(-100%);
+    transition: transform var(--base);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .chat__menu {
+    display: grid;                      /* hamburger gorunur */
+  }
+
+  .chat__topic {
+    display: none;                      /* dikey alan yok, gizle */
+  }
+
+  .user-card {
+    right: var(--s-3);
+    left: var(--s-3);
+    width: auto;
+  }
+}
+
+/* --- 520px alti: kompakt mobil --- */
+@media (max-width: 520px) {
+  .chat__head {
+    padding: 0 var(--s-2);
+    gap: var(--s-2);
+  }
+
+  .chat__head-divider,
+  .chat__head-actions .icon-btn:last-child {
+    display: none;                      /* onaylanabilir oge */
+  }
+
+  .pill {
+    display: none;
+  }
+
+  .msg,
+  .channel-intro {
+    padding-left: var(--s-4);
+    padding-right: var(--s-4);
+  }
+
+  .day-divider {
+    margin-left: var(--s-4);
+    margin-right: var(--s-4);
+  }
+
+  .composer {
+    padding: 0 var(--s-3) var(--s-3);
+  }
+
+  .composer__hint {
+    display: none;
+  }
+
+  .channel-intro__title {
+    font-size: var(--t-18);
+  }
+}
+
+/* --- 1024px alti: klavye ile gezinmeyi kolaylastir --- */
+@media (max-width: 1024px) {
+  .nav-item {
+    min-height: 40px;                   /* dokunma hedefi buyutulur */
+  }
+}
+
+
+/* =========================================================================
+   10. SCROLLBAR
+   -------------------------------------------------------------------------
+   Varsayilan scrollbar Windows'ta kalin ve acik renkli gorunuyordu.
+   Onu ince ve koyu temaya uygun hale getiriyoruz.
+   Webkit tabanli tarayicilarda (Chrome, Edge, Safari) calisir.
+   ========================================================================= */
+.sidebar__scroll::-webkit-scrollbar,
+.chat__body::-webkit-scrollbar,
+.members__scroll::-webkit-scrollbar,
+.msg__code::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.sidebar__scroll::-webkit-scrollbar-track,
+.chat__body::-webkit-scrollbar-track,
+.members__scroll::-webkit-scrollbar-track,
+.msg__code::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar__scroll::-webkit-scrollbar-thumb,
+.chat__body::-webkit-scrollbar-thumb,
+.members__scroll::-webkit-scrollbar-thumb,
+.msg__code::-webkit-scrollbar-thumb {
+  background: var(--c-border-strong);
+  border-radius: var(--r-pill);
+}
+
+.sidebar__scroll::-webkit-scrollbar-thumb:hover,
+.chat__body::-webkit-scrollbar-thumb:hover,
+.members__scroll::-webkit-scrollbar-thumb:hover,
+.msg__code::-webkit-scrollbar-thumb:hover {
+  background: #33434f;
+}
+
+/* Firefox icin ayni davranis (standart ozellik) */
+.sidebar__scroll,
+.chat__body,
+.members__scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-border-strong) transparent;
+}
+
+
+/* =========================================================================
+   11. HAREKET / ERISILEBILIRLIK
+   -------------------------------------------------------------------------
+   Bazi kullanicilar animasyonlari sistem ayarindan kapatir.
+   Onlar icin gecisleri devre disi birakiriz.
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
